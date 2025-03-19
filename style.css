@@ -1,0 +1,19 @@
+body {
+    margin: 0;
+    overflow: hidden;
+    font-family: sans-serif;
+}
+
+#gameCanvas {
+    width: 100vw;
+    height: 80vh;
+    background-color: #87ceeb;
+}
+
+#ui {
+    position: absolute;
+    top: 0;
+    left: 10px;
+    background-color: rgba(200, 200, 200, 0.8);
+    padding: 10px;
+}
