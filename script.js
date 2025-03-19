@@ -1,3 +1,5 @@
+document.addEventListener('DOMContentLoaded', () => {
+    // Dein JavaScript-Code hier
 // Canvas und 3D-Szene einrichten
 const canvas = document.getElementById('gameCanvas');
 const scene = new THREE.Scene();
@@ -391,3 +393,4 @@ function animate(time) {
     // ...
     renderer.render(scene, camera);
 }
+});
