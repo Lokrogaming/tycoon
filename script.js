@@ -144,10 +144,22 @@ function upgradeBuilding() {
     }
 }
 
+const bonusTypes = [
+    { type: "Geld", amount: 500 },
+    { type: "Materialien", amount: 250 },
+    { type: "Gebäude-Rabatt", amount: 0.2 },
+    { type: "Produktionssteigerung", amount: 0.1 }
+];
+
+function getRandomBonus() {
+    const randomIndex = Math.floor(Math.random() * bonusTypes.length);
+    return bonusTypes[randomIndex];
+}
+
 function generateChallenges() {
     challenges = [
-        { description: "Baue 3 Gebäude", completed: false },
-        { description: "Sammle 1000 Geld", completed: false }
+        { description: "Baue 3 Gebäude", completed: false, bonus: getRandomBonus() },
+        { description: "Sammle 1000 Geld", completed: false, bonus: getRandomBonus() }
     ];
     updateChallenges();
 }
@@ -155,37 +167,17 @@ function generateChallenges() {
 function updateChallenges() {
     const challengeList = document.getElementById('challengeList');
     challengeList.innerHTML = '';
-    challenges.forEach(challenge => {
+    challenges.forEach((challenge, index) => {
         const li = document.createElement('li');
-        li.textContent = challenge.description;
+        li.textContent = `${challenge.description} - Bonus: <span class="math-inline">\{challenge\.bonus\.type\} \(</span>{challenge.bonus.amount})`;
+        const button = document.createElement('button');
+        button.textContent = "Abschließen";
+        button.onclick = () => completeChallenge(index);
+        li.appendChild(button);
         challengeList.appendChild(li);
     });
 }
 
 function addBuildingToScene() {
     const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    const cube = new THREE.Mesh(geometry, material);
-    cube.position.x = buildings.length * 2;
-    scene.add(cube);
-}
-
-// Charakteranpassung
-const colorPicker = document.getElementById('colorPicker');
-colorPicker.addEventListener('input', () => {
-    if (character) {
-        character.traverse((node) => {
-            if (node.isMesh) {
-                node.material.color.set(colorPicker.value);
-            }
-        });
-    }
-});
-
-// Spiel-Loop
-function animate() {
-    requestAnimationFrame(animate);
-    camera.lookAt(scene.position);
-
-    if (character) {
-        character.position.copy(characterBody.
+    const material
