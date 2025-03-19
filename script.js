@@ -22,6 +22,7 @@ let challenges = [];
 // Charakter
 let character;
 let mixer;
+let characterBody;
 
 // Karte erstellen
 const mapGeometry = new THREE.PlaneGeometry(20, 20);
@@ -50,12 +51,11 @@ loader.load('character.gltf', (gltf) => {
 
     // Physikalischer Körper für den Charakter
     const characterShape = new CANNON.Box(new CANNON.Vec3(0.5, 1, 0.5));
-    const characterBody = new CANNON.Body({ mass: 1 });
+    characterBody = new CANNON.Body({ mass: 1 });
     characterBody.addShape(characterShape);
     characterBody.position.set(0, 2, 0);
     world.addBody(characterBody);
 });
-
 // Maus- und Touch-Ereignisse
 canvas.addEventListener('mousedown', onMouseDown, false);
 canvas.addEventListener('touchstart', onTouchStart, false);
@@ -169,7 +169,7 @@ function updateChallenges() {
     challengeList.innerHTML = '';
     challenges.forEach((challenge, index) => {
         const li = document.createElement('li');
-        li.textContent = `${challenge.description} - Bonus: <span class="math-inline">\{challenge\.bonus\.type\} \(</span>{challenge.bonus.amount})`;
+        li.textContent = `${challenge.description} - Bonus: ${challenge.bonus.type} (${challenge.bonus.amount})`;
         const button = document.createElement('button');
         button.textContent = "Abschließen";
         button.onclick = () => completeChallenge(index);
@@ -180,4 +180,214 @@ function updateChallenges() {
 
 function addBuildingToScene() {
     const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material
+    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    const cube = new THREE.Mesh(geometry, material);
+    cube.position.x = buildings.length * 2;
+    scene.add(cube);
+}
+// Charakteranpassung
+const colorPicker = document.getElementById('colorPicker');
+colorPicker.addEventListener('input', () => {
+    if (character) {
+        character.traverse((node) => {
+            if (node.isMesh) {
+                node.material.color.set(colorPicker.value);
+            }
+        });
+    }
+});
+
+// Spiel-Loop
+let lastFrameTime = 0;
+
+function animate(time) {
+    const deltaTime = (time - lastFrameTime) / 1000;
+    lastFrameTime = time;
+
+    requestAnimationFrame(animate);
+
+    if (mixer) {
+        mixer.update(deltaTime);
+    }
+
+    if (character && characterBody) {
+        character.position.copy(characterBody.position);
+        character.quaternion.copy(characterBody.quaternion);
+    }
+
+    world.step(1 / 60, deltaTime, 3);
+
+    renderer.render(scene, camera);
+}
+
+// Initialisierung
+updateResources();
+generateChallenges();
+animate();
+function completeChallenge(index) {
+    if (challenges[index].description === "Baue 3 Gebäude" && buildings.length >= 3) {
+        challenges[index].completed = true;
+        applyBonus(challenges[index].bonus);
+        updateChallenges();
+    } else if (challenges[index].description === "Sammle 1000 Geld" && money >= 1000) {
+        challenges[index].completed = true;
+        applyBonus(challenges[index].bonus);
+        updateChallenges();
+    } else {
+        alert("Herausforderung noch nicht erfüllt!");
+    }
+}
+
+function applyBonus(bonus) {
+    switch (bonus.type) {
+        case "Geld":
+            money += bonus.amount;
+            break;
+        case "Materialien":
+            materials += bonus.amount;
+            break;
+        case "Gebäude-Rabatt":
+            // Hier die Logik für Gebäude-Rabatt einfügen
+            break;
+        case "Produktionssteigerung":
+            // Hier die Logik für Produktionssteigerung einfügen
+            break;
+    }
+    updateResources();
+}
+// Steuerung mit Physik
+const moveSpeed = 5; // Geschwindigkeit der Bewegung
+const turnSpeed = 0.1; // Geschwindigkeit der Drehung
+
+function handleInput() {
+    if (characterBody) {
+        // Bewegung nach vorne (Beispiel)
+        if (/* Bedingung für Vorwärtsbewegung */) {
+            const forwardDirection = new CANNON.Vec3(0, 0, -1);
+            characterBody.applyLocalImpulse(forwardDirection.scale(moveSpeed), new CANNON.Vec3());
+        }
+
+        // Drehung (Beispiel)
+        if (/* Bedingung für Drehung */) {
+            characterBody.angularVelocity.set(0, turnSpeed, 0);
+        }
+    }
+}
+
+// In der animate()-Funktion
+function animate(time) {
+    // ...
+    handleInput();
+    // ...
+}
+// Spiel-Loop
+let lastFrameTime = 0;
+
+function animate(time) {
+    const deltaTime = (time - lastFrameTime) / 1000;
+    lastFrameTime = time;
+
+    requestAnimationFrame(animate);
+
+    if (mixer) {
+        mixer.update(deltaTime);
+    }
+
+    if (character && characterBody) {
+        character.position.copy(characterBody.position);
+        character.quaternion.copy(characterBody.quaternion);
+    }
+
+    world.step(1 / 60, deltaTime, 3);
+
+    handleInput(); // Steuerung mit Physik
+
+    renderer.render(scene, camera);
+}
+function completeChallenge(index) {
+    if (challenges[index].description === "Baue 3 Gebäude" && buildings.length >= 3) {
+        challenges[index].completed = true;
+        applyBonus(challenges[index].bonus);
+        updateChallenges();
+    } else if (challenges[index].description === "Sammle 1000 Geld" && money >= 1000) {
+        challenges[index].completed = true;
+        applyBonus(challenges[index].bonus);
+        updateChallenges();
+    } else {
+        alert("Herausforderung noch nicht erfüllt!");
+    }
+}
+function applyBonus(bonus) {
+    switch (bonus.type) {
+        case "Geld":
+            money += bonus.amount;
+            break;
+        case "Materialien":
+            materials += bonus.amount;
+            break;
+        case "Gebäude-Rabatt":
+            applyBuildingDiscount(bonus.amount);
+            break;
+        case "Produktionssteigerung":
+            applyProductionBoost(bonus.amount);
+            break;
+    }
+    updateResources();
+}
+
+function applyBuildingDiscount(discount) {
+    // Hier die Logik für Gebäude-Rabatt einfügen
+    // Beispiel: Reduziere die Kosten für das nächste Gebäude
+    buildingCostDiscount = discount;
+}
+
+function applyProductionBoost(boost) {
+    // Hier die Logik für Produktionssteigerung einfügen
+    // Beispiel: Erhöhe die Produktionsrate für Ressourcen
+    productionBoost = boost;
+}
+
+let buildingCostDiscount = 0;
+let productionBoost = 0;
+function completeChallenge(index) {
+    if (challenges[index].description === "Baue 3 Gebäude" && buildings.length >= 3) {
+        challenges[index].completed = true;
+        applyBonus(challenges[index].bonus);
+        showFeedback("Herausforderung abgeschlossen!");
+        updateChallenges();
+    } else if (challenges[index].description === "Sammle 1000 Geld" && money >= 1000) {
+        challenges[index].completed = true;
+        applyBonus(challenges[index].bonus);
+        showFeedback("Herausforderung abgeschlossen!");
+        updateChallenges();
+    } else {
+        showFeedback("Herausforderung noch nicht erfüllt!", true);
+    }
+}
+
+function showFeedback(message, isError = false) {
+    const feedbackElement = document.createElement("div");
+    feedbackElement.textContent = message;
+    feedbackElement.style.position = "absolute";
+    feedbackElement.style.top = "10px";
+    feedbackElement.style.left = "50%";
+    feedbackElement.style.transform = "translateX(-50%)";
+    feedbackElement.style.backgroundColor = isError ? "red" : "green";
+    feedbackElement.style.color = "white";
+    feedbackElement.style.padding = "10px";
+    feedbackElement.style.borderRadius = "5px";
+    document.body.appendChild(feedbackElement);
+
+    setTimeout(() => {
+        document.body.removeChild(feedbackElement);
+    }, 3000); // Nachricht nach 3 Sekunden entfernen
+}
+// Performance-Optimierung
+renderer.setPixelRatio(window.devicePixelRatio); // Hohe Auflösung für Retina-Displays
+renderer.shadowMap.enabled = true; // Schatten aktivieren (falls benötigt)
+
+// In der animate()-Funktion
+function animate(time) {
+    // ...
+    renderer.render(scene, camera);
+}
