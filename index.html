@@ -4,6 +4,8 @@
     <title>3D Tycoon</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://threejs.org/build/three.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cannon-es"></script>
+    <script src="https://unpkg.com/three@0.126.1/examples/js/loaders/GLTFLoader.js"></script>
 </head>
 <body>
     <canvas id="gameCanvas"></canvas>
@@ -20,6 +22,11 @@
         <div id="challenges">
             <h3>Tägliche Herausforderungen</h3>
             <ul id="challengeList"></ul>
+        </div>
+        <div id="characterCustomization">
+            <h3>Charakteranpassung</h3>
+            <label for="colorPicker">Farbe:</label>
+            <input type="color" id="colorPicker" value="#ff0000">
         </div>
     </div>
     <script src="script.js"></script>
