@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>3D Tycoon</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://threejs.org/build/three.js"></script>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <div id="ui">
+        <div id="resources">
+            Geld: <span id="money">1000</span>
+            <br>
+            Materialien: <span id="materials">500</span>
+        </div>
+        <div id="actions">
+            <button onclick="buildBuilding()">Gebäude bauen</button>
+            <button onclick="upgradeBuilding()">Gebäude verbessern</button>
+        </div>
+        <div id="challenges">
+            <h3>Tägliche Herausforderungen</h3>
+            <ul id="challengeList"></ul>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
