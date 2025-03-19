@@ -136,6 +136,9 @@ function buildBuilding() {
         buildings.push({});
         updateResources();
         addBuildingToScene();
+        document.getElementById("logger").value = "yes";
+        delay(200)
+        document.getElementById("logger").value = "0";
     }
 }
 
